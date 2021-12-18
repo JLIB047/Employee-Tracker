@@ -10,7 +10,7 @@ CREATE TABLE department (
     
 );
 
-CREATE TABLE position (
+CREATE TABLE positions (
     id INTEGER AUTO_INCREMENT, 
     title VARCHAR(30) NOT NULL,
     salary DECIMAL(6, 2) NOT NULL,

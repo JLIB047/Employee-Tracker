@@ -38,10 +38,10 @@ const start = () => {
     .then(function(answer){
         if(answer.action === "View all departments") {
             viewDept();
-        } else if (answer.action === "View all roles") {
-            viewRoles();
+        } else if (answer.action === "View all positions") {
+            viewPositions ();
         } else if (answer.action === "View all employees") {
-            viewemployees();
+            viewEmployee();
         } else if (answer.action === "Add a department") {
             addDept();
         } else if (answer.action === "Add a position") {
@@ -54,4 +54,52 @@ const start = () => {
             connection.end();
         }
     })
+}
+
+function viewDept() {
+    var query = `SELECT * FROM departments`;
+    connection.query(query, function(err, res){
+        console.log(`DEAPARTMENTS:`)
+        res.forEach(department => {
+            console.log(`ID: ${department.id} | NAME: ${department.name}`)
+        })
+        start();
+    });
+};
+
+function viewPositions() {
+    var query = `SELECT * FROM positions`;
+    connection.query(query, function(err, res){
+        res.forEach(position => {
+            console.log(`ID: ${position.id} | NAME: ${position.title} | SALARY: ${position.salary} | DEPARTMENT_ID: ${department.id}`)
+        })
+        start();
+    })
+
+}
+
+function viewEmployee() {
+    var query = `SELECT * FROM employee`;
+    connection.query(query, function(err, res){
+        res.forEach(employee => {
+            console.log(`ID: ${employee.id} | FIRST_NAME: ${employee.first_name} | LAST_NAME: ${employee.last_name} | POSITION_ID: ${employee.position.id} | MANAGER_ID: ${employee.manager_id}`)
+        })
+        start();
+    })
+}
+
+function addDept () {
+
+}
+
+function addPosition () {
+
+}
+
+function addEmployee () {
+
+}
+
+function updatePosition () {
+
 }
