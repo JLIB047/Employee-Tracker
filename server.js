@@ -1,8 +1,10 @@
-const mysql = require('mysql');
+const mysql = require('mysql2');
 const inquirer = require('inquirer');
 const { Table } = require('console-table-printer');
 
-const connection = mysql.createConnection({
+require('dotenv').config()
+
+var connection = mysql.createConnection({
     multipleStatements: true,
     host: 'localhost',
 
@@ -10,17 +12,18 @@ const connection = mysql.createConnection({
 
     user: 'root',
 
-    password: "$lickCode044",
-    database: "employee_db"
+    password: process.env.DB_PASSWORD,
+    database: 'employee_db'
 });
 
 connection.connect(function(err) {
-    if(err) throw(err);
+    if (err) throw err;
     start();
 });
 
-const start = () => {
+function start () {
     inquirer.prompt({
+    
         name: "action",
         type: "list",
         message: "What would you like to do?",
@@ -35,6 +38,7 @@ const start = () => {
             "Exit"
         ]
     })
+   
     .then(function(answer){
         if(answer.action === "View all departments") {
             viewDept();
@@ -103,3 +107,4 @@ function addEmployee () {
 function updatePosition () {
 
 }
+

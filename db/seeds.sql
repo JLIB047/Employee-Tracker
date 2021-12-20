@@ -7,18 +7,18 @@ VALUES
     ("Marketing"),
     ("Corporate");
 
-INSERT INTO position (title, salary, department_id) 
+INSERT INTO positions (title, salary, department_id) 
 VALUES 
-    ("HR Manager", 70, 3),
+    ("HR Manager", 70, 1),
     ("Data Analyst", 65, 2), 
-    ("Engineer", 85, 2),
-    ("Social Media Manager", 75, 1),
-    ("Director", 100, 4);
+    ("Engineer", 85, 3),
+    ("Social Media Manager", 75, 4),
+    ("Director", 100, 5);
 
-INSERT INTO employee (first_name, last_name, position_id) 
+INSERT INTO employee (first_name, last_name, position_id, manager_id) 
 VALUES 
-    ("Bill", "williams", 1),
-    ("Jessica", "Winters", 3),
-    ("Daniel", "Sharp", 2),
-    ("Emily", "Stein", 4),
-    ("Jimbo", "Fischer", 1);
+    ("Bill", "Williams", 1, 1),
+    ("Jessica", "Winters", 3, 2),
+    ("Daniel", "Sharp", 2, 3),
+    ("Emily", "Stein", 4, 4),
+    ("Jimbo", "Fischer", 1, 5);
