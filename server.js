@@ -1,32 +1,33 @@
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
-const { Table } = require('console-table-printer');
+const cTable = require('console.table');
 
 require('dotenv').config()
 
 const connection = mysql.createConnection({
     host: "localhost",
     port: 3306, 
-    user: process.env.DB_USER,
+    user: "root",
     password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
+    database: "employee_db"
 });
 
 connection.connect(function(err) {
     if (err) throw err;
-    start()
+    start();
 });
 
-function start () {
-    inquirer.prompt([
+function start() {
+    inquirer
+    .prompt([
     {
-        name: "action",
         type: "list",
         message: "What would you like to do?",
+        name: "action",
         choices: [
+            "View all employees",
             "View all departments",
             "View all positions",
-            "View all employees",
             "Add a department",
             "Add a position",
             "Add an employee",
@@ -35,8 +36,14 @@ function start () {
         ]
     }
 
-]).then(function(answer){
-       switch (answer.action){
+]).then(function(answers){
+       switch (answers.action){
+           
+            //View all Employees 
+            case "View all employees":
+                viewAllEmployees();
+            break;
+
             //View all Departments 
             case "View all departments":
                 viewDept();
@@ -47,28 +54,23 @@ function start () {
                 viewPositions();
             break;
 
-            //View all Employees 
-            case "View all Employees":
-                viewEmployees();
-            break;
-
             //Add Department 
-            case "Add department":
+            case "Add a department":
                 addDept();
             break;
 
             //Add Position 
-            case "Add Position":
+            case "Add a position":
                 addPosition();
             break;
 
             //Add Employee
-            case "Add Employee":
+            case "Add an employee":
                 addEmployee();
             break;
 
             //Update Position
-            case "Update Position":
+            case "Update employee position":
                 updatePosition();
             break;
 
@@ -76,51 +78,85 @@ function start () {
             case "Exit":
                 connection.end();
             break;
+            default: 
+                break;
        }
 
     })
 };
 
-function viewDept() {
-    connection.query("SELECT department.id AS ID, department.title AS Department FROM department",
+function viewAllEmployees() {
+    connection.query('SELECT employee.id AS ID, employee.first_name AS First_Name, employee.last_name AS Last_Name FROM employee',
     function(err, res){
         if (err) throw err
-        console.table(res);
-        start();
-    })
-};
-
-function viewPositions() {
-    connection.query("SELECT positions.id AS ID, positions.title AS Title FROM positions",
-    function(err, res){
-        if(err) throw err
-        console.log("")
-        console.table(res);
-        start();
-    })
-};
-
-function viewEmployees() {
-    connection.query("SELECT employee.first_name, employee.last_name, positions.title, positions.salary, department.title AS department, employee.manager_id" +
-    "FROM emplopyee" +
-    "JOIN positions ON positions.id = employee.positions_id" +
-    "JOIN department ON positions.department_id = department.id"+ 
-    "ORDER BY employee.id",
-    function(err, res) {
-        if (err) throw err
-        console.log("");
-        console.log("Employee List");
-        console.log("");
+        console.log("All Employees")
         console.table(res)
         start()
     })
     
-};
+}
+
+function viewDept() {
+    connection.query('SELECT department.id AS ID, department.title AS Department FROM department',
+    function(err, res){
+        if (err) throw err
+        console.log("All Departments")
+        console.table(res)
+        start()
+    })
+}
+
+function viewPositions() {
+    connection.query('SELECT positions.id AS ID, positions.title AS Title FROM positions',
+    function(err, res){
+        if(err) throw err
+        console.log("All Positions");
+        console.table(res)
+        start()
+    })
+}
+
+//position array for employee addition 
+let posArr = [];
+function selectPosition() {
+    connection.query('SELECT * FROM positions', function(err, res){
+        if (err) throw err
+        for(var i=0; i < res.length; i++){
+            posArr.push(res[i].title);
+        }
+    })
+    return posArr;
+}
+
+//manager Array 
+let managerArr = [];
+function selectManager() {
+    connection.query('SELECT first_name, last_name FROM employee', function(err, res){
+        if (err) throw err
+        for (var i = 0; i < res.length; i++) {
+            managerArr.push(res[i].first_name);
+        }
+    })
+    return managerArr;
+}
+
+//department array 
+var deptArr = [];
+function selectDepartment() {
+    connection.query('SELECT * FROM department', function(err, res){
+        if (err) throw err
+        for(var i = 0; i < res.length; i++) {
+            deptArr.push(res[i].title);
+        }
+    })
+    return deptArr;
+}
+
 
 function addDept() {
     inquirer.prompt([
         {
-            name: "name",
+            name: "title",
             type: "input",
             message: "What department would you like to add?"
         },
@@ -132,12 +168,12 @@ function addDept() {
     ]).then(function(answers){
         connection.query("INSERT INTO department SET ? ",
         {
-            name: answers.name,
+            title: answers.title,
             id: answers.id
         },
         function(err, res) {
-            if(err) throw(err)
-            console.Table(res);
+            if(err) throw err
+            console.table(res);
             start();
         }
 
@@ -147,7 +183,42 @@ function addDept() {
 }
 
 function addPosition () {
+    connection.query('SELECT positions.title AS Title, positions.salary AS Salary FROM positions LEFT JOIN department.title AS Department FROM department;', function(err, res){
+        inquirer.prompt([
+            {
+                name: 'title',
+                type: 'input',
+                message: 'What is the name of this new position?'
+            },
+            {
+                name: 'salary',
+                type: 'input',
+                message: 'What is the salary of the new positon?'
+            },
+            {
+                name: 'department',
+                type: 'rawlist',
+                message: 'What department does the new position belong to?',
+                choices: selectDepartment()
+            }
+        ]).then(function(answers){
+            var deptId = selectDepartment().indexOf(answers.choice) + 1
+            connection.query(
+                'INSERT INTO positions SET ?',
+                {
+                    title: answers.title,
+                    salary: answers.salary,
+                    departmentID: deptId
+                },
+                function(err) {
+                    if(err) throw err
+                    console.table(answers);
+                    start();
+                }
 
+            )
+        })
+    })
 }
 
 function addEmployee () {
