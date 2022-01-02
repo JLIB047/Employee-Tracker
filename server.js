@@ -208,7 +208,7 @@ function addPosition () {
                 {
                     title: answers.title,
                     salary: answers.salary,
-                    departmentID: deptId
+                    department_id: deptId
                 },
                 function(err) {
                     if(err) throw err
@@ -222,10 +222,85 @@ function addPosition () {
 }
 
 function addEmployee () {
+    inquirer.prompt([
+        {
+            name: 'first_name',
+            type: 'input',
+            message: "What is the employee's first name?"
+        },
+        {
+            name: 'last_name',
+            type: 'input',
+            message: "What is the employee's last name?"
+        },
+        {
+            name: 'positions',
+            type: 'list',
+            message: "What is the employee's position?",
+            choices: selectPosition()
+        },
+        {
+            name: 'choice',
+            type: 'rawlist',
+            message: 'Who is managing the new employee?',
+            choices: selectManager()
+        }
 
+    ]).then(function (answers){
+        var positionsId = selectPosition().indexOf(answers.positions) + 1
+        var managerId = selectManager().indexOf(answers.choice) + 1
+        connection.query('INSERT INTO employee SET ?',
+        {
+            first_name: answers.first_name,
+            last_name: answers.last_name,
+            manager_id: managerId,
+            positions_id: positionsId
+        },
+        function(err){
+            if (err) throw err
+            console.table(answers)
+            start()
+        })
+    })
 }
 
 function updatePosition () {
+    connection.query('SELECT employee.last_name, positions.title FROM employee JOIN positions ON employee.positions_id = positions.id',
+    (err, res) => {
+        if (err) throw err;
 
+        inquirer.prompt([
+            {
+                name: "last_name",
+                type: "rawlist",
+                choices: function() {
+                    var last_name = [];
+                    for(var i = 0; i < res.length; i++) {
+                        last_name.push(res[i].last_name);
+                    }
+                    return last_name;
+                },
+                message: "What is the employee's last name?",
+            },
+            {
+                name: "positions",
+                type: "rawlist",
+                message: "What is the employee's new title?",
+                choices: selectPosition()
+            },
+        ]).then(function (answers) {
+            var positions_id = selectPostiton().indexOf(answers.positions) + 1;
+            connection.query("UPDATE employee SET WHERE ?",
+            {
+                last_name: answers.last_name,
+                positions_id: positions_id
+            },
+            function (err){
+                if (err) throw err;
+                console.table(answers);
+                start()
+            });
+        });
+    });
 }
 
