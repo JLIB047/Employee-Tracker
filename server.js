@@ -265,7 +265,7 @@ function addEmployee () {
 }
 
 function updatePosition () {
-    connection.query('SELECT employee.last_name, positions.title FROM employee JOIN positions ON employee.positions_id = positions.id',
+    connection.query('SELECT employee.last_name, positions.title FROM employee JOIN positions ON employee.positions_id = positions.id;',
     (err, res) => {
         if (err) throw err;
 
@@ -289,14 +289,16 @@ function updatePosition () {
                 choices: selectPosition()
             },
         ]).then(function (answers) {
-            var positions_id = selectPostiton().indexOf(answers.positions) + 1;
+            var positionsId = selectPosition().indexOf(answers.positions) + 1;
             connection.query("UPDATE employee SET WHERE ?",
             {
+                
                 last_name: answers.last_name,
-                positions_id: positions_id
-            },
+                positions_id: positionsId
+            }, 
             function (err){
-                if (err) throw err;
+                if (err) 
+                    throw err;
                 console.table(answers);
                 start()
             });
